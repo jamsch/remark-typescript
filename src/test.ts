@@ -9,12 +9,7 @@ test('transforms TS code blocks', (): void => {
     (): void => { }
     \`\`\`
   `;
-  expect(
-    remark()
-      .use(remarkTypescript)
-      .processSync(ts)
-      .toString()
-  ).toEqual(
+  expect(remark().use(remarkTypescript).processSync(ts).toString()).toEqual(
     outdent`
       ${ts}
 
@@ -32,12 +27,7 @@ test('preserves code block titles', (): void => {
     (): void => { }
     \`\`\`
   `;
-  expect(
-    remark()
-      .use(remarkTypescript)
-      .processSync(ts)
-      .toString()
-  ).toEqual(
+  expect(remark().use(remarkTypescript).processSync(ts).toString()).toEqual(
     outdent`
       ${ts}
 
