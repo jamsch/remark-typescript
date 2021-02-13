@@ -13,8 +13,8 @@ function insertAt(
   return [...array.slice(0, index), item, ...array.slice(index)];
 }
 
-function isReactComponent(node: Node, tag: string): boolean {
-  return node && node.type === 'jsx' && node.value === tag;
+function isReactComponent(node: Node, tagRegex: RegExp): boolean {
+  return node && node.type === 'jsx' && tagRegex.test(node.value as string);
 }
 
 const PRESERVE_COMMENT = '// preserve-line';
@@ -33,6 +33,9 @@ export = function remarkTypescript({
   wrapperComponent,
   prettierOptions = {}
 }: Options = {}): Transformer {
+  const openingTagRegex = new RegExp(`<${wrapperComponent}[^>]*>`);
+  const closingTagRegex = new RegExp(`</${wrapperComponent}>`);
+
   return function transformer(tree): void {
     function visitor(node: Code, index: number, parent: Parent): void {
       if (/^tsx?/.test(node.lang)) {
@@ -41,8 +44,8 @@ export = function remarkTypescript({
 
         if (wrapperComponent) {
           const isWrapped =
-            isReactComponent(prevNode, `<${wrapperComponent}>`) &&
-            isReactComponent(nextNode, `</${wrapperComponent}>`);
+            isReactComponent(prevNode, openingTagRegex) &&
+            isReactComponent(nextNode, closingTagRegex);
           if (!isWrapped) {
             return;
           }
@@ -86,6 +89,7 @@ export = function remarkTypescript({
 
           node.value = lines.map(removePreserveComment).join('\n');
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error(error.message);
         }
       }
